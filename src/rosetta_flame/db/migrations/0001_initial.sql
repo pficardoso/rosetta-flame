@@ -44,7 +44,6 @@ CREATE TABLE topic (
     also_levels      TEXT NOT NULL DEFAULT '',
     unit             TEXT,
     order_in_program INTEGER,
-    source_program   TEXT,
     source_ref       TEXT,
     FOREIGN KEY (id, item_type) REFERENCES learning_item (id, item_type)
 );

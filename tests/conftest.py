@@ -37,7 +37,6 @@ def topic(conn):
         main_level="B1",
         unit="3",
         order_in_program=30,
-        source_program="Test Program",
     )
 
 

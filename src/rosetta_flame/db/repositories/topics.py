@@ -22,13 +22,12 @@ _UPDATABLE = frozenset(
         "also_levels",
         "unit",
         "order_in_program",
-        "source_program",
         "source_ref",
     }
 )
 _COLUMNS = (
     "id, code, name, description, type, category, main_level, also_levels,"
-    " unit, order_in_program, source_program, source_ref"
+    " unit, order_in_program, source_ref"
 )
 _SELECT = f"SELECT {_COLUMNS} FROM topic"
 _SEPARATOR = ";"
@@ -81,7 +80,6 @@ def _from_row(row: sqlite3.Row) -> Topic:
         also_levels=parse_levels(row["also_levels"]),
         unit=row["unit"],
         order_in_program=row["order_in_program"],
-        source_program=row["source_program"],
         source_ref=row["source_ref"],
     )
 
@@ -98,7 +96,6 @@ def create(
     also_levels: str | Iterable[Level | str] | None = None,
     unit: str | None = None,
     order_in_program: int | None = None,
-    source_program: str | None = None,
     source_ref: str | None = None,
 ) -> Topic:
     topic_type = TopicType(type)
@@ -110,7 +107,7 @@ def create(
             (item_id, ItemType.TOPIC.value),
         )
         conn.execute(
-            f"INSERT INTO topic ({_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            f"INSERT INTO topic ({_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 item_id,
                 code,
@@ -122,7 +119,6 @@ def create(
                 levels_to_db(also),
                 unit,
                 order_in_program,
-                source_program,
                 source_ref,
             ),
         )
@@ -146,7 +142,6 @@ def list_all(
     category: str | None = None,
     main_level: Level | str | None = None,
     level: Level | str | None = None,
-    source_program: str | None = None,
 ) -> list[Topic]:
     """List Topics in program order.
 
@@ -168,9 +163,6 @@ def list_all(
         value = Level(level).value
         clauses.append("(main_level = ? OR ';' || also_levels || ';' LIKE ?)")
         params.extend([value, f"%;{value};%"])
-    if source_program is not None:
-        clauses.append("source_program = ?")
-        params.append(source_program)
     where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
     rows = conn.execute(
         f"{_SELECT}{where} ORDER BY order_in_program IS NULL, order_in_program, id", params

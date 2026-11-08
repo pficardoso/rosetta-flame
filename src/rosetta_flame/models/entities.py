@@ -45,7 +45,6 @@ class Topic:
     also_levels: tuple[Level, ...] = ()
     unit: str | None = None
     order_in_program: int | None = None
-    source_program: str | None = None
     source_ref: str | None = None
 
 
