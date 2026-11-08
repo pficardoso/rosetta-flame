@@ -9,6 +9,7 @@ from rosetta_flame.models.enums import (
     ExerciseSource,
     ExerciseType,
     ItemType,
+    Level,
     Status,
     TopicType,
 )
@@ -25,15 +26,27 @@ class LearningItem:
 
 
 @dataclass(frozen=True, slots=True)
+class TopicTypeInfo:
+    """A row of the topic_type lookup table: a type and its description."""
+
+    name: TopicType
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
 class Topic:
     id: str
     name: str
     description: str
     type: TopicType
-    level: str | None = None
+    code: str | None = None
+    category: str | None = None
+    main_level: Level | None = None
+    also_levels: tuple[Level, ...] = ()
     unit: str | None = None
     order_in_program: int | None = None
     source_program: str | None = None
+    source_ref: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -10,20 +10,45 @@ CREATE TABLE learning_item (
     UNIQUE (id, item_type)
 );
 
+-- The kinds of Topic. A lookup table rather than a CHECK, so a new type is a new row,
+-- not a schema change. The descriptions also tell the AI where each mistake belongs.
+CREATE TABLE topic_type (
+    name        TEXT NOT NULL PRIMARY KEY,
+    description TEXT NOT NULL
+);
+
+INSERT INTO topic_type (name, description) VALUES
+    ('grammar', 'Rules for how words and sentences are formed and combined.'),
+    ('vocabulary', 'Words and their meanings, grouped by theme or level, and choosing the right word.'),
+    ('lexical', 'Words learned as units: collocations, phrasal verbs, dependent prepositions, confusable words, linkers.'),
+    ('functions', 'What you do with the language, and the phrases that fit the situation and tone.');
+
 -- The composite foreign key on topic and weak_spot makes the database refuse a
 -- row whose learning_item is of the other kind.
+-- code: stable slug from the seed file (for example g-past-simple), so a re-import
+--   updates a Topic instead of duplicating it. NULL for Topics added by hand.
+-- main_level: the CEFR level where the Topic is first taught.
+-- also_levels: later levels where it comes back, as semicolon-separated text
+--   (for example 'A2;B1'); empty when there are none. Checked in the application.
+-- source_ref: entry number(s) in the source program, for tracing a Topic back.
 CREATE TABLE topic (
     id               TEXT NOT NULL PRIMARY KEY,
     item_type        TEXT NOT NULL DEFAULT 'topic' CHECK (item_type = 'topic'),
+    code             TEXT UNIQUE,
     name             TEXT NOT NULL,
     description      TEXT NOT NULL DEFAULT '',
-    type             TEXT NOT NULL CHECK (type IN ('grammar', 'vocabulary')),
-    level            TEXT,
+    type             TEXT NOT NULL REFERENCES topic_type (name),
+    category         TEXT,
+    main_level       TEXT CHECK (main_level IS NULL
+                                 OR main_level IN ('A1', 'A2', 'B1', 'B2', 'C1', 'C2')),
+    also_levels      TEXT NOT NULL DEFAULT '',
     unit             TEXT,
     order_in_program INTEGER,
     source_program   TEXT,
+    source_ref       TEXT,
     FOREIGN KEY (id, item_type) REFERENCES learning_item (id, item_type)
 );
+CREATE INDEX idx_topic_type ON topic (type);
 
 CREATE TABLE weak_spot (
     id          TEXT NOT NULL PRIMARY KEY,
