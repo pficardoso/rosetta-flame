@@ -34,7 +34,7 @@ def topic(conn):
         conn,
         name="Quantifiers",
         type=TopicType.GRAMMAR,
-        level="B1",
+        main_level="B1",
         unit="3",
         order_in_program=30,
         source_program="Test Program",

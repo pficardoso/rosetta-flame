@@ -1,13 +1,14 @@
 import pytest
 
 from rosetta_flame.db.repositories import learning_items, topics
-from rosetta_flame.models.enums import ItemType, TopicType
+from rosetta_flame.models.enums import ItemType, Level, TopicType
 
 
 def test_create_and_get(conn, topic):
     assert topics.get(conn, topic.id) == topic
     assert topic.type is TopicType.GRAMMAR
-    assert (topic.level, topic.unit, topic.order_in_program) == ("B1", "3", 30)
+    assert (topic.main_level, topic.unit, topic.order_in_program) == (Level.B1, "3", 30)
+    assert topic.also_levels == ()
 
 
 def test_create_registers_a_topic_learning_item(conn, topic):
@@ -28,12 +29,14 @@ def test_invalid_type_is_rejected_and_nothing_is_stored(conn):
 
 
 def test_list_follows_program_order_and_filters(conn):
-    articles = topics.create(conn, name="Articles", type="grammar", level="A2", order_in_program=10)
-    food = topics.create(conn, name="Food", type="vocabulary", level="A2", order_in_program=20)
+    articles = topics.create(
+        conn, name="Articles", type="grammar", main_level="A2", order_in_program=10
+    )
+    food = topics.create(conn, name="Food", type="vocabulary", main_level="A2", order_in_program=20)
     loose = topics.create(conn, name="Loose", type="vocabulary")
     assert [t.id for t in topics.list_all(conn)] == [articles.id, food.id, loose.id]
     assert [t.id for t in topics.list_all(conn, type="vocabulary")] == [food.id, loose.id]
-    assert [t.id for t in topics.list_all(conn, level="A2")] == [articles.id, food.id]
+    assert [t.id for t in topics.list_all(conn, main_level="A2")] == [articles.id, food.id]
 
 
 def test_update(conn, topic):
