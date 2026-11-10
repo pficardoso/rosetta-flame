@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "An app that helps me learn and improve my English."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "claude-agent-sdk>=0.2.180",
+    "dotenv>=0.9.9",
+]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
